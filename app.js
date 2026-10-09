@@ -1,4 +1,4 @@
-JavaScript
+
 
 /* School & College Management Software
    Version 1.0
