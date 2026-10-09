@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#155e75">
+<title>স্কুল ও কলেজ ম্যানেজমেন্ট</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div><div class="brand">🏫 স্কুল ও কলেজ ম্যানেজমেন্ট</div><div class="sub">School & College Management System</div></div>
+  <button id="installBtn" class="secondary hidden">অ্যাপ ইনস্টল</button>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <button class="nav active" data-page="dashboard">▦ ড্যাশবোর্ড</button>
+    <button class="nav" data-page="students">👨‍🎓 শিক্ষার্থী</button>
+    <button class="nav" data-page="attendance">☑ উপস্থিতি</button>
+    <button class="nav" data-page="fees">৳ ফি আদায়</button>
+    <button class="nav" data-page="results">📋 পরীক্ষার ফলাফল</button>
+    <button class="nav" data-page="teachers">👩‍🏫 শিক্ষক</button>
+    <button class="nav" data-page="reports">📊 রিপোর্ট</button>
+    <button class="nav" data-page="backup">⚙ সেটিংস ও ব্যাকআপ</button>
+  </aside>
+  <main id="main" class="main"></main>
+</div>
+<footer>প্রাথমিক সংস্করণ • ডেটা এই ডিভাইসে সংরক্ষিত থাকে • নিয়মিত ব্যাকআপ নিন</footer>
+<div id="toast" class="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>

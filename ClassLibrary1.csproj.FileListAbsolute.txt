@@ -1,0 +1,8 @@
+D:\desktop_application\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.dll
+D:\desktop_application\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.pdb
+D:\desktop_application\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.dll
+D:\desktop_application\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.pdb
+D:\desktop_application\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.csprojResolveAssemblyReference.cache
+D:\desktop_application\ClassLibrary1\ClassLibrary1\obj\Debug\Interop.zkemkeeper.dll
+D:\desktop_application\ClassLibrary1\ClassLibrary1\obj\Debug\Interop.ZKFPEngXControl.dll
+D:\desktop_application\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.csproj.ResolveComReference.cache
