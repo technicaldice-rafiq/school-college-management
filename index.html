@@ -7,27 +7,88 @@
 <title>স্কুল ও কলেজ ম্যানেজমেন্ট</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<style>
+.login-screen {
+  max-width: 420px;
+  margin: 55px auto;
+  padding: 24px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 3px 18px #0002;
+}
+.login-screen input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px;
+  margin: 8px 0 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.login-screen button {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 8px;
+  background: #155e75;
+  color: white;
+  font-size: 16px;
+}
+#loginMessage { margin-top: 12px; overflow-wrap: anywhere; }
+#appShell { display: none; }
+</style>
 </head>
 <body>
-<header class="topbar">
-  <div><div class="brand">🏫 স্কুল ও কলেজ ম্যানেজমেন্ট</div><div class="sub">School & College Management System</div></div>
-  <button id="installBtn" class="secondary hidden">অ্যাপ ইনস্টল</button>
-</header>
-<div class="layout">
-  <aside class="sidebar">
-    <button class="nav active" data-page="dashboard">▦ ড্যাশবোর্ড</button>
-    <button class="nav" data-page="students">👨‍🎓 শিক্ষার্থী</button>
-    <button class="nav" data-page="attendance">☑ উপস্থিতি</button>
-    <button class="nav" data-page="fees">৳ ফি আদায়</button>
-    <button class="nav" data-page="results">📋 পরীক্ষার ফলাফল</button>
-    <button class="nav" data-page="teachers">👩‍🏫 শিক্ষক</button>
-    <button class="nav" data-page="reports">📊 রিপোর্ট</button>
-    <button class="nav" data-page="backup">⚙ সেটিংস ও ব্যাকআপ</button>
-  </aside>
-  <main id="main" class="main"></main>
+
+<section id="loginScreen" class="login-screen">
+  <h2>🏫 স্কুল ও কলেজ ম্যানেজমেন্ট</h2>
+  <p>আপনার অ্যাকাউন্ট দিয়ে লগইন করুন</p>
+
+  <form id="loginForm">
+    <label for="loginEmail">ইমেইল</label>
+    <input id="loginEmail" type="email" required
+      autocomplete="username" placeholder="আপনার ইমেইল">
+
+    <label for="loginPassword">পাসওয়ার্ড</label>
+    <input id="loginPassword" type="password" required
+      autocomplete="current-password" placeholder="আপনার পাসওয়ার্ড">
+
+    <button type="submit" id="loginButton">লগইন করুন</button>
+  </form>
+
+  <p id="loginMessage" role="status"></p>
+</section>
+
+<div id="appShell">
+  <header class="topbar">
+    <div>
+      <div class="brand">🏫 স্কুল ও কলেজ ম্যানেজমেন্ট</div>
+      <div class="sub">School & College Management System</div>
+      <div id="userInfo"></div>
+    </div>
+    <button id="installBtn" class="secondary hidden">অ্যাপ ইনস্টল</button>
+    <button id="logoutBtn" type="button">লগআউট</button>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="nav active" data-page="dashboard">▦ ড্যাশবোর্ড</button>
+      <button class="nav" data-page="students">👨‍🎓 শিক্ষার্থী</button>
+      <button class="nav" data-page="attendance">☑ উপস্থিতি</button>
+      <button class="nav" data-page="fees">৳ ফি আদায়</button>
+      <button class="nav" data-page="results">📋 পরীক্ষার ফলাফল</button>
+      <button class="nav" data-page="teachers">👩‍🏫 শিক্ষক</button>
+      <button class="nav" data-page="reports">📊 রিপোর্ট</button>
+      <button class="nav" data-page="backup">⚙ সেটিংস ও ব্যাকআপ</button>
+    </aside>
+    <main id="main" class="main"></main>
+  </div>
 </div>
-<footer>প্রাথমিক সংস্করণ • ডেটা এই ডিভাইসে সংরক্ষিত থাকে • নিয়মিত ব্যাকআপ নিন</footer>
+
+<footer>স্কুল ও কলেজ ম্যানেজমেন্ট সফটওয়্যার</footer>
 <div id="toast" class="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js?v=20261010-1"></script>
+<script src="auth.js?v=1"></script>
 </body>
 </html>
