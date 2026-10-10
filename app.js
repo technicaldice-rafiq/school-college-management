@@ -547,6 +547,63 @@ function saveDB() {
     });
   });
 
+  function mergeLists(localList, remoteList, key) {
+    const merged = new Map();
+
+    (remoteList || []).forEach(item => {
+      merged.set(item[key], item);
+    });
+
+    (localList || []).forEach(item => {
+      if (!merged.has(item[key])) {
+        merged.set(item[key], item);
+      }
+    });
+
+    return Array.from(merged.values());
+  }
+
+  window.addEventListener("school:cloud-loaded", event => {
+    try {
+      const remote = event.detail;
+
+      if (remote !== null && remote !== undefined) {
+        if (
+          typeof remote !== "object" ||
+          !Array.isArray(remote.students) ||
+          !Array.isArray(remote.teachers) ||
+          !Array.isArray(remote.attendance) ||
+          !Array.isArray(remote.fees) ||
+          !Array.isArray(remote.results)
+        ) {
+          throw new Error("Cloud data format is invalid");
+        }
+
+        db = {
+          ...initial,
+          ...remote,
+          settings: {
+            ...initial.settings,
+            ...(remote.settings || {}),
+            ...(db.settings || {})
+          },
+          students: mergeLists(db.students, remote.students, "studentId"),
+          teachers: mergeLists(db.teachers, remote.teachers, "teacherId"),
+          attendance: mergeLists(db.attendance, remote.attendance, "id"),
+          fees: mergeLists(db.fees, remote.fees, "id"),
+          results: mergeLists(db.results, remote.results, "id")
+        };
+      }
+
+      saveDB();
+      render();
+      notice("ডেটাবেসের তথ্য লোড হয়েছে");
+    } catch (error) {
+      console.error("Cloud data load failed:", error);
+      notice("অনলাইন তথ্য লোড করা যায়নি");
+    }
+  });
+
   render();
 })();
 
