@@ -35,9 +35,27 @@
   let db = loadDB();
   let currentPage = "dashboard";
 
-  function saveDB() {
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
+  
+function saveDB() {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+
+  if (!window.schoolCloudSyncReady || !window.schoolCloudSync) {
+    return;
   }
+
+  clearTimeout(saveDB.cloudTimer);
+
+  saveDB.cloudTimer = setTimeout(async () => {
+    try {
+      await window.schoolCloudSync.save(db);
+      notice("তথ্য অনলাইনে সংরক্ষণ হয়েছে");
+    } catch (error) {
+      console.error("Cloud save failed:", error);
+      notice("অনলাইনে সংরক্ষণ হয়নি। ইন্টারনেট পরীক্ষা করুন।");
+    }
+  }, 500);
+}
+
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, c => ({
