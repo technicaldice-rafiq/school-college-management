@@ -1,0 +1,19 @@
+.scm-profile-photo-label{display:flex;flex-direction:column;gap:7px;font-size:14px}
+.scm-profile-photo-label input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:7px;background:#fff}
+.scm-profile-avatar-button{width:48px;height:48px;padding:2px;margin:0;border:1px solid #cbd5e1;border-radius:50%;background:#f8fafc;color:#475569;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;font-size:10px}
+.scm-profile-avatar{width:44px;height:44px;object-fit:cover;border-radius:50%;display:block}
+.scm-profile-name{background:transparent!important;color:#075985!important;text-decoration:underline;padding:0!important;margin:0!important;font-weight:700}
+.scm-profile-modal{position:fixed;inset:0;background:#0f172ab8;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.scm-profile-modal-card{background:#fff;color:#172033;width:min(720px,100%);max-height:92vh;overflow:auto;border-radius:16px;padding:22px;box-shadow:0 20px 60px #0004}
+.scm-profile-modal-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+.scm-profile-large-photo{width:120px;height:120px;object-fit:cover;border-radius:14px;border:1px solid #cbd5e1;background:#f1f5f9}
+.scm-profile-large-empty{display:flex;align-items:center;justify-content:center;color:#64748b}
+.scm-profile-modal-top h2{margin:0 0 8px;font-size:24px}
+.scm-profile-modal-top p{margin:0 0 6px;color:#64748b}
+.scm-profile-details-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.scm-profile-detail-box{padding:12px;border:1px solid #e2e8f0;border-radius:9px;overflow-wrap:anywhere}
+.scm-profile-detail-box span{display:block;color:#64748b;font-size:13px;margin-bottom:6px}
+.scm-profile-detail-box strong{font-weight:700}
+.scm-profile-modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+@media(max-width:600px){.scm-profile-modal-card{padding:15px}.scm-profile-large-photo{width:96px;height:96px}.scm-profile-modal-top h2{font-size:20px}}
+@media print{body>*:not(.scm-profile-modal){display:none!important}.scm-profile-modal{position:static;inset:auto;background:white;padding:0;display:block}.scm-profile-modal-card{width:100%;max-height:none;overflow:visible;box-shadow:none}.scm-profile-modal-actions{display:none!important}}
