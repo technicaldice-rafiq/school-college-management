@@ -1,4 +1,3 @@
-
 "use strict";
 
 const SUPABASE_URL = "https://clivmkonzwyrnwluymkf.supabase.co";
@@ -36,7 +35,9 @@ async function openApp(user) {
 
     if (error || !data || !roleNames[data.role]) {
       await db.auth.signOut();
-      showLogin("অ্যাকাউন্টের ভূমিকা পাওয়া যায়নি। Supabase User Profiles পরীক্ষা করুন।");
+      showLogin(
+        "অ্যাকাউন্টের ভূমিকা পাওয়া যায়নি। Supabase User Profiles পরীক্ষা করুন।"
+      );
       return;
     }
 
@@ -60,25 +61,47 @@ async function openApp(user) {
     document.getElementById("userInfo").textContent =
       (user.email || "") + " | " + roleNames[data.role];
 
+    // Accounts & Fees-এর অনুমতি যুক্ত করা হয়েছে
     const permissions = {
       admin: [
-        "dashboard", "students", "attendance", "fees",
-        "results", "teachers", "reports", "backup"
+        "dashboard",
+        "students",
+        "attendance",
+        "fees",
+        "results",
+        "teachers",
+        "reports",
+        "backup",
+        "accounts"
       ],
+
       teacher: [
-        "dashboard", "students", "attendance", "results", "reports"
+        "dashboard",
+        "students",
+        "attendance",
+        "results",
+        "reports"
       ],
-      accountant: ["dashboard", "fees", "reports"]
+
+      accountant: [
+        "dashboard",
+        "fees",
+        "reports",
+        "accounts"
+      ]
     };
 
     document.querySelectorAll(".nav").forEach(button => {
       button.style.display =
-        permissions[data.role].includes(button.dataset.page) ? "" : "none";
+        permissions[data.role].includes(button.dataset.page)
+          ? ""
+          : "none";
     });
 
     window.currentSchoolRole = data.role;
   } catch (error) {
     console.error("Login/app error:", error);
+
     showLogin(
       "সংযোগে সমস্যা হয়েছে। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন। বিস্তারিত: " +
       (error.message || "অজানা ত্রুটি")
@@ -127,19 +150,22 @@ loginForm.addEventListener("submit", async event => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  loginButton.disabled = false;
+document.getElementById("logoutBtn").addEventListener(
+  "click",
+  async () => {
+    loginButton.disabled = false;
 
-  const { error } = await db.auth.signOut();
+    const { error } = await db.auth.signOut();
 
-  if (error) {
-    showLogin("লগআউট করতে সমস্যা হয়েছে: " + error.message);
-    return;
+    if (error) {
+      showLogin("লগআউট করতে সমস্যা হয়েছে: " + error.message);
+      return;
+    }
+
+    window.schoolCloudSyncReady = false;
+    showLogin("আপনি লগআউট করেছেন।");
   }
-
-  window.schoolCloudSyncReady = false;
-  showLogin("আপনি লগআউট করেছেন।");
-});
+);
 
 (async function restoreSession() {
   try {
