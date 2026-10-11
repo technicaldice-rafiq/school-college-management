@@ -324,76 +324,61 @@ document.getElementById("logoutBtn").addEventListener(
     }
 
     try {
-      const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-      const salt = Array.from(saltBytes)
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
+// Restore online session or previously unlocked offline PIN session
+async function restoreOfflinePinSession() {
+  if (navigator.onLine) return false;
 
-      const hash = await hashPin(first, salt);
+  try {
+    const user = JSON.parse(
+      localStorage.getItem("school_offline_pin_user") || "null"
+    );
 
-      localStorage.setItem(pinSaltKey, salt);
-      localStorage.setItem(pinHashKey, hash);
-      localStorage.setItem(cacheKey, JSON.stringify({
-        id: session.user.id,
-        email: session.user.email || ""
-      }));
+    const unlockedUserId = sessionStorage.getItem(
+      "school_offline_pin_unlocked_user"
+    );
 
-      alert("Offline PIN সেট হয়েছে। এখন ইন্টারনেট বন্ধ করে পরীক্ষা করতে পারেন।");
-    } catch (error) {
-      console.error("PIN setup failed:", error);
-      alert("PIN সেট করা যায়নি। ব্রাউজার আপডেট করে আবার চেষ্টা করুন।");
+    if (!user || !user.id || unlockedUserId !== user.id) {
+      return false;
     }
-  });
 
-  // ইন্টারনেট না থাকলে সংরক্ষিত PIN যাচাই
-  document.getElementById("offlinePinLogin")
-    .addEventListener("click", async () => {
-      const message = document.getElementById("offlinePinMessage");
-      const pin = document.getElementById("offlinePin").value;
+    const role = localStorage.getItem(
+      "school_cached_role_" + user.id
+    );
 
-      if (navigator.onLine) {
-        message.textContent =
-          "ইন্টারনেট চালু আছে। স্বাভাবিক লগইন ব্যবহার করুন।";
-        return;
-      }
+    if (!role || !roleNames[role]) return false;
 
-      if (!/^\d{6}$/.test(pin)) {
-        message.textContent = "৬ সংখ্যার PIN লিখুন।";
-        return;
-      }
+    await openApp(user);
+    return true;
+  } catch (error) {
+    console.warn("Offline session restore failed:", error);
+    return false;
+  }
+}
 
-      const user = getCachedUser();
-      const salt = localStorage.getItem(pinSaltKey);
-      const savedHash = localStorage.getItem(pinHashKey);
+(async function restoreSession() {
+  try {
+    const { data, error } = await db.auth.getSession();
 
-      if (!user || !user.id || !salt || !savedHash) {
-        message.textContent =
-          "আগে অনলাইনে লগইন করে PIN সেট করতে হবে।";
-        return;
-      }
+    if (error) throw error;
 
-      try {
-        const enteredHash = await hashPin(pin, salt);
+    if (data.session?.user) {
+      await openApp(data.session.user);
+    } else if (!(await restoreOfflinePinSession())) {
+      showLogin(
+        navigator.onLine
+          ? ""
+          : "ইন্টারনেট নেই। Offline PIN দিয়ে ঢুকুন।"
+      );
+    }
+  } catch (error) {
+    console.error("Session restore failed:", error);
 
-        if (enteredHash !== savedHash) {
-          message.textContent = "PIN ভুল হয়েছে। আবার চেষ্টা করুন।";
-          return;
-        }
-
-        const role = localStorage.getItem(
-          "school_cached_role_" + user.id
-        );
-
-        if (!role || !roleNames[role]) {
-          message.textContent =
-            "আগে অনলাইনে লগইন করে অ্যাকাউন্ট যাচাই করুন।";
-          return;
-        }
-
-        await openApp(user);
-      } catch (error) {
-        console.error("Offline PIN login failed:", error);
-        message.textContent = "PIN যাচাই করা যায়নি।";
-      }
-    });
+    if (!(await restoreOfflinePinSession())) {
+      showLogin(
+        navigator.onLine
+          ? "সেশন যাচাই করা যায়নি। আবার লগইন করুন।"
+          : "ইন্টারনেট নেই। Offline PIN দিয়ে ঢুকুন।"
+      );
+    }
+  }
 })();
