@@ -194,7 +194,7 @@ document.getElementById("logoutBtn").addEventListener(
       return;
     }
 
-    window.schoolCloudSyncReady = false;
+    window.schoolCloudSyncReady = Boolean(window.schoolCloudSync);
     showLogin("আপনি লগআউট করেছেন।");
   }
 );
