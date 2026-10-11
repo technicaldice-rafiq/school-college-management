@@ -111,6 +111,45 @@ async function openApp(user) {
       return;
     }
 
+    // মালিকের অ্যাকাউন্টে সাবস্ক্রিপশন লাগবে না
+    const OWNER_USER_ID = "fced704d-d7ab-4970-96b2-0f6c5a76c903";
+
+    if (navigator.onLine && user.id !== OWNER_USER_ID) {
+      try {
+        const controlResult = await db
+          .from("software_control")
+          .select("is_enabled")
+          .eq("id", 1)
+          .maybeSingle();
+
+        if (controlResult.error) throw controlResult.error;
+
+        if (controlResult.data?.is_enabled === false) {
+          showLogin("মালিক আপাতত সফটওয়্যার বন্ধ রেখেছেন।");
+          return;
+        }
+
+        const subscriptionResult = await db
+          .from("school_subscriptions")
+          .select("active_until")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (subscriptionResult.error) throw subscriptionResult.error;
+
+        const activeUntil = subscriptionResult.data?.active_until;
+
+        if (!activeUntil || new Date(activeUntil).getTime() <= Date.now()) {
+          showLogin("সাবস্ক্রিপশন সক্রিয় নয় অথবা মেয়াদ শেষ।");
+          return;
+        }
+      } catch (error) {
+        console.error("Subscription verification failed:", error);
+        showLogin("সাবস্ক্রিপশন যাচাই করা যায়নি। ইন্টারনেট ও ডেটাবেস পরীক্ষা করুন।");
+        return;
+      }
+    }
+
     window.schoolCloudSyncReady = false;
 
     if (navigator.onLine && window.schoolCloudSync) {
