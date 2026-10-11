@@ -98,5 +98,17 @@
   প্রস্তুতকারকঃ রফিকুল ইসলাম | মোবাইলঃ ০১৭৬৪৯৭২২২৮
 </footer>
 
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./service-worker.js")
+        .catch(function (error) {
+          console.error("Offline setup failed:", error);
+        });
+    });
+  }
+</script>
+</body>
+
 </body>
 </html>
