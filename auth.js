@@ -23,45 +23,79 @@ function showLogin(message = "") {
   loginMessage.textContent = message;
 }
 
+
 async function openApp(user) {
   try {
     loginMessage.textContent = "অ্যাকাউন্ট যাচাই হচ্ছে...";
 
-    const { data, error } = await db
-      .from("user_profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+    let role = null;
+    const roleCacheKey = "school_cached_role_" + user.id;
 
-    if (error || !data || !roleNames[data.role]) {
-      await db.auth.signOut();
+    // প্রথমে অনলাইন থেকে ব্যবহারকারীর ভূমিকা যাচাই
+    if (navigator.onLine) {
+      try {
+        const { data, error } = await db
+          .from("user_profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (!error && data && roleNames[data.role]) {
+          role = data.role;
+          localStorage.setItem(roleCacheKey, role);
+        }
+      } catch (error) {
+        console.warn("Online role check failed:", error);
+      }
+    }
+
+    // ইন্টারনেট না থাকলে আগের যাচাইকৃত ভূমিকা ব্যবহার
+    if (!role) {
+      const cachedRole = localStorage.getItem(roleCacheKey);
+
+      if (cachedRole && roleNames[cachedRole]) {
+        role = cachedRole;
+      }
+    }
+
+    if (!role || !roleNames[role]) {
       showLogin(
-        "অ্যাকাউন্টের ভূমিকা পাওয়া যায়নি। Supabase User Profiles পরীক্ষা করুন।"
+        "অ্যাকাউন্ট যাচাই করা যায়নি। ইন্টারনেট চালু করে আবার লগইন করুন।"
       );
       return;
     }
 
-    if (!window.schoolCloudSync) {
-      throw new Error("Cloud sync module পাওয়া যায়নি");
+    // আগে সংরক্ষিত স্থানীয় ডেটা বজায় থাকবে
+    window.schoolCloudSyncReady = false;
+
+    // ইন্টারনেট থাকলে ক্লাউড ডেটা আনার চেষ্টা
+    if (navigator.onLine && window.schoolCloudSync) {
+      try {
+        const cloudData = await window.schoolCloudSync.load();
+
+        if (cloudData) {
+          window.dispatchEvent(
+            new CustomEvent("school:cloud-loaded", {
+              detail: cloudData
+            })
+          );
+        }
+
+        window.schoolCloudSyncReady = true;
+      } catch (error) {
+        console.warn(
+          "Cloud unavailable; continuing with local data:",
+          error
+        );
+      }
     }
-
-    const cloudData = await window.schoolCloudSync.load();
-
-    window.dispatchEvent(
-      new CustomEvent("school:cloud-loaded", {
-        detail: cloudData
-      })
-    );
-
-    window.schoolCloudSyncReady = true;
 
     loginScreen.style.display = "none";
     appShell.style.display = "block";
 
     document.getElementById("userInfo").textContent =
-      (user.email || "") + " | " + roleNames[data.role];
+      (user.email || "") + " | " + roleNames[role];
 
-    // Accounts & Fees-এর অনুমতি যুক্ত করা হয়েছে
     const permissions = {
       admin: [
         "dashboard",
@@ -74,7 +108,6 @@ async function openApp(user) {
         "backup",
         "accounts"
       ],
-
       teacher: [
         "dashboard",
         "students",
@@ -82,7 +115,6 @@ async function openApp(user) {
         "results",
         "reports"
       ],
-
       accountant: [
         "dashboard",
         "fees",
@@ -93,17 +125,17 @@ async function openApp(user) {
 
     document.querySelectorAll(".nav").forEach(button => {
       button.style.display =
-        permissions[data.role].includes(button.dataset.page)
+        permissions[role].includes(button.dataset.page)
           ? ""
           : "none";
     });
 
-    window.currentSchoolRole = data.role;
+    window.currentSchoolRole = role;
   } catch (error) {
     console.error("Login/app error:", error);
 
     showLogin(
-      "সংযোগে সমস্যা হয়েছে। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন। বিস্তারিত: " +
+      "সফটওয়্যার খুলতে সমস্যা হয়েছে: " +
       (error.message || "অজানা ত্রুটি")
     );
   }
