@@ -398,6 +398,55 @@ function backupPage() {
     <h3>ফাইল ব্যাকআপ</h3>
     <button class="scm-btn" data-export>
       JSON ব্যাকআপ ডাউনলোড
+
+
+function backupPage() {
+  const auto = localStorage.getItem(
+    "school_college_management_auto_backup_v1"
+  );
+  const previous = localStorage.getItem(
+    "school_college_management_previous_backup_v1"
+  );
+
+  function backupDate(raw) {
+    try {
+      const snapshot = JSON.parse(raw);
+      return snapshot.savedAt
+        ? new Date(snapshot.savedAt).toLocaleString("bn-BD")
+        : "তারিখ নেই";
+    } catch (_) {
+      return "ব্যাকআপ নেই";
+    }
+  }
+
+  const status = !navigator.onLine
+    ? "ইন্টারনেট বন্ধ"
+    : (window.schoolCloudStatus || "যাচাই করা হয়নি");
+
+  return pageTitle(
+    "ব্যাকআপ ও সিঙ্ক",
+    "ডেটা সংরক্ষণ এবং প্রয়োজনে ফিরিয়ে আনুন"
+  ) +
+  `<section class="scm-card">
+    <h3>স্বয়ংক্রিয় ব্যাকআপ</h3>
+    <p>সর্বশেষ ব্যাকআপ: ${esc(
+      auto ? backupDate(auto) : "এখনও তৈরি হয়নি"
+    )}</p>
+    <p>আগের ব্যাকআপ: ${esc(
+      previous ? backupDate(previous) : "এখনও নেই"
+    )}</p>
+
+    <button class="scm-btn" data-restore-auto>
+      সর্বশেষ ব্যাকআপ ফিরিয়ে আনুন
+    </button>
+    <button class="scm-btn" data-restore-previous>
+      আগের ব্যাকআপ ফিরিয়ে আনুন
+    </button>
+
+    <hr>
+    <h3>ফাইল ব্যাকআপ</h3>
+    <button class="scm-btn" data-export>
+      JSON ব্যাকআপ ডাউনলোড
     </button>
 
     <hr>
