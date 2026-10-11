@@ -604,6 +604,28 @@ function saveDB() {
     }
   });
 
+  // Accounts & Fees module connection
+  window.schoolApp = {
+    getData: () => db,
+    save: saveDB,
+    render: render,
+    registerPage: (name, title, renderer) => {
+      pageNames[name] = title;
+      renderers[name] = renderer;
+    },
+    setPage: name => {
+      if (renderers[name]) {
+        currentPage = name;
+        render();
+      }
+    },
+    esc: esc,
+    money: money,
+    today: today,
+    id: id,
+    notice: notice
+  };
+
   render();
 })();
 
