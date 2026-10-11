@@ -87,6 +87,29 @@
   };
 
   window.schoolCloudStatus = "ready";
+  window.addEventListener("online", async function () {
+    if (
+      !window.schoolCloudSyncReady ||
+      !window.schoolApp ||
+      typeof window.schoolApp.getData !== "function"
+    ) {
+      return;
+    }
 
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      await save(window.schoolApp.getData());
+
+      window.dispatchEvent(
+        new CustomEvent("school:cloud-sync-success")
+      );
+
+      console.log("Cloud sync completed after reconnect.");
+    } catch (error) {
+      console.error("Cloud sync retry failed:", error);
+      window.schoolCloudStatus = "error";
+    }
+  });
   console.log("School cloud sync module loaded.");
 })();
