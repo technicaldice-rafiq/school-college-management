@@ -591,7 +591,11 @@ function saveDB() {
           teachers: mergeLists(db.teachers, remote.teachers, "teacherId"),
           attendance: mergeLists(db.attendance, remote.attendance, "id"),
           fees: mergeLists(db.fees, remote.fees, "id"),
-          results: mergeLists(db.results, remote.results, "id")
+          results: mergeLists(db.results, remote.results, "id"),
+          accountSalaries: mergeLists(db.accountSalaries, remote.accountSalaries, "id"),
+          accountStudentFees: mergeLists(db.accountStudentFees, remote.accountStudentFees, "id"),
+          accountExamFees: mergeLists(db.accountExamFees, remote.accountExamFees, "id"),
+          accountMonthlyRates: mergeLists(db.accountMonthlyRates, remote.accountMonthlyRates, "id")
         };
       }
 
