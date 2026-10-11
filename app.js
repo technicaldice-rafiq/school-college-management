@@ -36,10 +36,57 @@
   let currentPage = "dashboard";
 
   
-function saveDB() {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
 
-  if (!window.schoolCloudSyncReady || !window.schoolCloudSync) {
+function saveDB() {
+  const serialized = JSON.stringify(db);
+
+  // মূল ডেটা লোকালি সংরক্ষণ
+  localStorage.setItem(DB_KEY, serialized);
+
+  // সর্বশেষ এবং আগের ব্যাকআপ রাখা
+  try {
+    const currentKey =
+      "school_college_management_auto_backup_v1";
+
+    const previousKey =
+      "school_college_management_previous_backup_v1";
+
+    const oldSnapshot = localStorage.getItem(currentKey);
+    let oldData = null;
+
+    if (oldSnapshot) {
+      try {
+        oldData = JSON.parse(oldSnapshot);
+      } catch (_) {}
+    }
+
+    if (
+      !oldData ||
+      JSON.stringify(oldData.data) !== serialized
+    ) {
+      if (oldData && oldData.data) {
+        localStorage.setItem(previousKey, oldSnapshot);
+      }
+
+      localStorage.setItem(
+        currentKey,
+        JSON.stringify({
+          savedAt: new Date().toISOString(),
+          data: db
+        })
+      );
+    }
+  } catch (error) {
+    console.warn("Automatic backup failed:", error);
+  }
+
+  // ইন্টারনেট ও ক্লাউড সিঙ্ক প্রস্তুত না থাকলে
+  // লোকাল ডেটা সংরক্ষণ করেই থামবে
+  if (
+    !navigator.onLine ||
+    !window.schoolCloudSyncReady ||
+    !window.schoolCloudSync
+  ) {
     return;
   }
 
@@ -51,10 +98,13 @@ function saveDB() {
       notice("তথ্য অনলাইনে সংরক্ষণ হয়েছে");
     } catch (error) {
       console.error("Cloud save failed:", error);
-      notice("অনলাইনে সংরক্ষণ হয়নি। ইন্টারনেট পরীক্ষা করুন।");
+      notice(
+        "লোকাল ডেটা সংরক্ষিত; ক্লাউড সিঙ্ক হয়নি।"
+      );
     }
-  }, 500);
+  }, 700);
 }
+
 
 
   function esc(value) {
