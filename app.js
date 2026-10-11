@@ -350,6 +350,15 @@ function backupPage() {
     "school_college_management_previous_backup_v1"
   );
 
+  
+function backupPage() {
+  const auto = localStorage.getItem(
+    "school_college_management_auto_backup_v1"
+  );
+  const previous = localStorage.getItem(
+    "school_college_management_previous_backup_v1"
+  );
+
   function backupDate(raw) {
     try {
       const snapshot = JSON.parse(raw);
@@ -381,7 +390,6 @@ function backupPage() {
     <button class="scm-btn" data-restore-auto>
       সর্বশেষ ব্যাকআপ ফিরিয়ে আনুন
     </button>
-
     <button class="scm-btn" data-restore-previous>
       আগের ব্যাকআপ ফিরিয়ে আনুন
     </button>
