@@ -538,6 +538,119 @@ function backupPage() {
       return;
     }
 
+    const autoRestore = event.target.closest(
+      "[data-restore-auto]"
+    );
+
+    const previousRestore = event.target.closest(
+      "[data-restore-previous]"
+    );
+
+    if (autoRestore || previousRestore) {
+      const key = autoRestore
+        ? "school_college_management_auto_backup_v1"
+        : "school_college_management_previous_backup_v1";
+
+      try {
+        const raw = localStorage.getItem(key);
+
+        if (!raw) {
+          notice("ব্যাকআপ পাওয়া যায়নি");
+          return;
+        }
+
+        const snapshot = JSON.parse(raw);
+        const data = snapshot.data;
+
+        const required = [
+          "students",
+          "teachers",
+          "attendance",
+          "fees",
+          "results"
+        ];
+
+        if (
+          !data ||
+          !required.every(k => Array.isArray(data[k]))
+        ) {
+          notice("ব্যাকআপ ফাইল সঠিক নয়");
+          return;
+        }
+
+        if (!confirm(
+          "বর্তমান তথ্য প্রতিস্থাপন করবেন? আগে JSON ব্যাকআপ ডাউনলোড করে রাখুন।"
+        )) return;
+
+        db = {
+          ...initial,
+          ...data,
+          settings: {
+            ...initial.settings,
+            ...(data.settings || {})
+          }
+        };
+
+        saveDB();
+        render();
+        notice("ব্যাকআপ ফিরিয়ে আনা হয়েছে");
+      } catch (error) {
+        console.error(error);
+        notice("ব্যাকআপ ফিরিয়ে আনা যায়নি");
+      }
+
+      return;
+    }
+
+    const cloudButton = event.target.closest(
+      "[data-cloud-sync]"
+    );
+
+    if (cloudButton) {
+      if (!navigator.onLine) {
+        notice("আগে ইন্টারনেট চালু করুন");
+        return;
+      }
+
+      if (!window.schoolCloudSync) {
+        notice("ক্লাউড সিঙ্ক ব্যবস্থা পাওয়া যায়নি");
+        return;
+      }
+
+      cloudButton.disabled = true;
+      cloudButton.textContent = "সিঙ্ক হচ্ছে...";
+
+      window.schoolCloudSync.load()
+        .then(remote => {
+          if (remote) {
+            window.dispatchEvent(
+              new CustomEvent("school:cloud-loaded", {
+                detail: remote
+              })
+            );
+          } else {
+            return window.schoolCloudSync.save(
+              window.schoolApp.getData()
+            );
+          }
+        })
+        .then(() => {
+          window.schoolCloudStatus = "connected";
+          notice("ক্লাউড সিঙ্ক সম্পন্ন হয়েছে");
+        })
+        .catch(error => {
+          console.error("Cloud sync failed:", error);
+          window.schoolCloudStatus = "error";
+          notice("সিঙ্ক হয়নি; ইন্টারনেট ও লগইন পরীক্ষা করুন");
+        })
+        .finally(() => {
+          cloudButton.disabled = false;
+          cloudButton.textContent = "এখনই ক্লাউড সিঙ্ক করুন";
+        });
+
+      return;
+    }
+
     const importButton = event.target.closest("[data-import]");
     if (importButton) {
       const file = $("#backup-file")?.files?.[0];
