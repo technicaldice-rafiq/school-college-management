@@ -213,4 +213,187 @@ document.getElementById("logoutBtn").addEventListener(
     showLogin("সেশন যাচাই করা যায়নি। আবার লগইন করুন।");
   }
 })();
-// Offline PIN feature will be added here
+
+/* Offline PIN Login */
+(function () {
+  const pinStyle = document.createElement("style");
+  pinStyle.textContent = `
+    .offline-pin-box {
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    .offline-pin-box input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 8px 0;
+    }
+    .offline-pin-box button {
+      padding: 10px 14px;
+      margin: 5px 4px 5px 0;
+      cursor: pointer;
+    }
+  `;
+  document.head.appendChild(pinStyle);
+
+  const cacheKey = "school_offline_pin_user";
+  const pinHashKey = "school_offline_pin_hash";
+  const pinSaltKey = "school_offline_pin_salt";
+
+  function getCachedUser() {
+    try {
+      return JSON.parse(localStorage.getItem(cacheKey) || "null");
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function hashPin(pin, salt) {
+    const bytes = new TextEncoder().encode(salt + ":" + pin);
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  // আগের অনলাইন লগইন সেশন থেকে ব্যবহারকারীর পরিচয় সংরক্ষণ
+  db.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+      const user = {
+        id: session.user.id,
+        email: session.user.email || ""
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(user));
+    }
+  });
+
+  // লগইন পেজে Offline PIN ঘর যোগ
+  const pinBox = document.createElement("div");
+  pinBox.className = "offline-pin-box";
+  pinBox.innerHTML = `
+    <h3>Offline PIN Login</h3>
+    <p>আগে অনলাইনে লগইন করে PIN সেট করতে হবে।</p>
+    <label for="offlinePin">৬ সংখ্যার PIN</label>
+    <input id="offlinePin" type="password"
+      inputmode="numeric" maxlength="6" pattern="[0-9]{6}"
+      placeholder="৬ সংখ্যার PIN" autocomplete="off">
+    <button type="button" id="offlinePinLogin">
+      PIN দিয়ে খুলুন
+    </button>
+    <p id="offlinePinMessage" role="status"></p>
+  `;
+  loginScreen.appendChild(pinBox);
+
+  // অনলাইনে লগইন থাকা অবস্থায় PIN সেট করার বাটন
+  const setupButton = document.createElement("button");
+  setupButton.type = "button";
+  setupButton.textContent = "Offline PIN সেট করুন";
+  setupButton.style.margin = "10px";
+  appShell.appendChild(setupButton);
+
+  setupButton.addEventListener("click", async () => {
+    if (!navigator.onLine) {
+      alert("PIN সেট করতে আগে ইন্টারনেট চালু করুন।");
+      return;
+    }
+
+    let session;
+    try {
+      const result = await db.auth.getSession();
+      session = result.data && result.data.session;
+    } catch (_) {}
+
+    if (!session || !session.user) {
+      alert("আগে ইমেইল ও পাসওয়ার্ড দিয়ে লগইন করুন।");
+      return;
+    }
+
+    const first = prompt("নতুন ৬ সংখ্যার PIN দিন:");
+    if (!first || !/^\d{6}$/.test(first)) {
+      alert("PIN অবশ্যই ৬ সংখ্যার হতে হবে।");
+      return;
+    }
+
+    const second = prompt("একই PIN আবার লিখুন:");
+    if (first !== second) {
+      alert("দুটি PIN মেলেনি। আবার চেষ্টা করুন।");
+      return;
+    }
+
+    try {
+      const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+      const salt = Array.from(saltBytes)
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      const hash = await hashPin(first, salt);
+
+      localStorage.setItem(pinSaltKey, salt);
+      localStorage.setItem(pinHashKey, hash);
+      localStorage.setItem(cacheKey, JSON.stringify({
+        id: session.user.id,
+        email: session.user.email || ""
+      }));
+
+      alert("Offline PIN সেট হয়েছে। এখন ইন্টারনেট বন্ধ করে পরীক্ষা করতে পারেন।");
+    } catch (error) {
+      console.error("PIN setup failed:", error);
+      alert("PIN সেট করা যায়নি। ব্রাউজার আপডেট করে আবার চেষ্টা করুন।");
+    }
+  });
+
+  // ইন্টারনেট না থাকলে সংরক্ষিত PIN যাচাই
+  document.getElementById("offlinePinLogin")
+    .addEventListener("click", async () => {
+      const message = document.getElementById("offlinePinMessage");
+      const pin = document.getElementById("offlinePin").value;
+
+      if (navigator.onLine) {
+        message.textContent =
+          "ইন্টারনেট চালু আছে। স্বাভাবিক লগইন ব্যবহার করুন।";
+        return;
+      }
+
+      if (!/^\d{6}$/.test(pin)) {
+        message.textContent = "৬ সংখ্যার PIN লিখুন।";
+        return;
+      }
+
+      const user = getCachedUser();
+      const salt = localStorage.getItem(pinSaltKey);
+      const savedHash = localStorage.getItem(pinHashKey);
+
+      if (!user || !user.id || !salt || !savedHash) {
+        message.textContent =
+          "আগে অনলাইনে লগইন করে PIN সেট করতে হবে।";
+        return;
+      }
+
+      try {
+        const enteredHash = await hashPin(pin, salt);
+
+        if (enteredHash !== savedHash) {
+          message.textContent = "PIN ভুল হয়েছে। আবার চেষ্টা করুন।";
+          return;
+        }
+
+        const role = localStorage.getItem(
+          "school_cached_role_" + user.id
+        );
+
+        if (!role || !roleNames[role]) {
+          message.textContent =
+            "আগে অনলাইনে লগইন করে অ্যাকাউন্ট যাচাই করুন।";
+          return;
+        }
+
+        await openApp(user);
+      } catch (error) {
+        console.error("Offline PIN login failed:", error);
+        message.textContent = "PIN যাচাই করা যায়নি।";
+      }
+    });
+})();
