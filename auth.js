@@ -23,7 +23,7 @@ function showLogin(message = "") {
   loginMessage.textContent = message;
 }
 
-
+sessionStorage.setItem("school_offline_pin_unlocked_user", user.id);
 async function openApp(user) {
   try {
     loginMessage.textContent = "অ্যাকাউন্ট যাচাই হচ্ছে...";
