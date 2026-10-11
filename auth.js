@@ -213,3 +213,4 @@ document.getElementById("logoutBtn").addEventListener(
     showLogin("সেশন যাচাই করা যায়নি। আবার লগইন করুন।");
   }
 })();
+// Offline PIN feature will be added here
