@@ -23,7 +23,7 @@ function showLogin(message = "") {
   loginMessage.textContent = message;
 }
 
-sessionStorage.setItem("school_offline_pin_unlocked_user", user.id);
+
 async function openApp(user) {
   try {
     loginMessage.textContent = "অ্যাকাউন্ট যাচাই হচ্ছে...";
@@ -162,7 +162,7 @@ loginForm.addEventListener("submit", async event => {
     if (!data.user) {
       throw new Error("ব্যবহারকারীর তথ্য পাওয়া যায়নি");
     }
-
+    sessionStorage.setItem("school_offline_pin_unlocked_user", user.id);
     await openApp(data.user);
   } catch (error) {
     console.error("Login failed:", error);
