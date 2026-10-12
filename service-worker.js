@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "school-college-offline-v1";
+const CACHE_NAME = "school-college-offline-v2";
 const BASE = "/school-college-management/";
 
 const FILES_TO_CACHE = [
@@ -10,8 +10,9 @@ const FILES_TO_CACHE = [
   BASE + "accounts.js?v=20261011-2",
   BASE + "profiles.css?v=20261011-1",
   BASE + "profiles.js?v=20261011-1",
-  BASE + "auth.js?v=2",
-  BASE + "manifest.json"
+  BASE + "auth.js?v=3",
+  BASE + "manifest.json",
+  BASE + "icon.svg"
 ];
 
 self.addEventListener("install", event => {
@@ -37,8 +38,10 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key.startsWith("school-college-offline-") &&
-                         key !== CACHE_NAME)
+          .filter(key =>
+            key.startsWith("school-college-offline-") &&
+            key !== CACHE_NAME
+          )
           .map(key => caches.delete(key))
       )
     )
