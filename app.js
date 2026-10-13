@@ -1,4 +1,4 @@
-JavaScript
+
 /* School & College Management Software
    Premium Version 2.0
    LocalStorage + Backup + Cloud Sync + Accounts API
