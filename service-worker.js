@@ -1,13 +1,13 @@
 
-const CACHE_NAME = "school-college-offline-v3";
+const CACHE_NAME = "school-college-offline-v4";
 const BASE = "/school-college-management/";
 
 const FILES_TO_CACHE = [
   BASE,
   BASE + "index.html",
   BASE + "styles.css",
-  BASE + "app.js?v=20261011-4",
-  BASE + "accounts.js?v=20261011-2",
+  BASE + "app.js?v=20261013-1",
+  BASE + "accounts.js?v=20261013-1",
   BASE + "profiles.css?v=20261011-1",
   BASE + "profiles.js?v=20261011-1",
   BASE + "auth.js?v=3",
