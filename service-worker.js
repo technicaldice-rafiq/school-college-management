@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "school-college-offline-v2";
+const CACHE_NAME = "school-college-offline-v3";
 const BASE = "/school-college-management/";
 
 const FILES_TO_CACHE = [
