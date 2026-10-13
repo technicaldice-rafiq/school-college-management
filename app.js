@@ -942,29 +942,32 @@
       return;
     }
 
-    const listName = listMap[page];
-    if (!listName) return;
+    
+const listName = listMap[page];
+if (!listName) return;
 
-    if (page === "students" || page === "teachers") {
-      const key = page === "students" ? "studentId" : "teacherId";
-      const identifier = String(data[key] || "").trim();
+const editId = form.dataset.editId || "";
 
-      if (!identifier) {
-        notice("আইডি নম্বর লিখুন");
-        return;
-      }
+if (page === "students" || page === "teachers") {
+  const key = page === "students" ? "studentId" : "teacherId";
+  const identifier = String(data[key] || "").trim();
 
+  if (!identifier) {
+    notice("আইডি নম্বর লিখুন");
+    return;
+  }
 
-if (db[listName].some(item =>
-  String(item[key]).trim() === identifier &&
-  item.id !== editId
-)) {
-  notice("এই আইডি আগে থেকেই আছে");
-  return;
+  if (db[listName].some(item =>
+    String(item[key] || "").trim() === identifier &&
+    String(item.id) !== editId
+  )) {
+    notice("এই আইডি আগে থেকেই আছে");
+    return;
+  }
+
+  data[key] = identifier;
+  }
 }
-
-      data[key] = identifier;
-    }
 
     if (["attendance", "fees", "results"].includes(page)) {
       const studentExists = db.students.some(student =>
@@ -1022,7 +1025,8 @@ if (saveDB()) {
     ? "তথ্য সফলভাবে আপডেট হয়েছে"
     : "তথ্য সফলভাবে সংরক্ষণ হয়েছে");
 }
-
+});
+   
   document.addEventListener("input", event => {
     const search = event.target.closest("[data-search]");
     if (!search) return;
