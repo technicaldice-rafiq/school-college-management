@@ -974,7 +974,7 @@ if (page === "students" || page === "teachers") {
 
   data[key] = identifier;
   }
-}
+     
 
     if (["attendance", "fees", "results"].includes(page)) {
       const studentExists = db.students.some(student =>
@@ -1007,7 +1007,6 @@ if (page === "students" || page === "teachers") {
       return;
     }
 
-    const editId = form.dataset.editId;
 
 if (editId) {
   const existingRecord = db[listName].find(
