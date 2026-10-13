@@ -954,12 +954,14 @@
         return;
       }
 
-      if (db[listName].some(item =>
-        String(item[key]).trim() === identifier
-      )) {
-        notice("এই আইডি আগে থেকেই আছে");
-        return;
-      }
+
+if (db[listName].some(item =>
+  String(item[key]).trim() === identifier &&
+  item.id !== editId
+)) {
+  notice("এই আইডি আগে থেকেই আছে");
+  return;
+}
 
       data[key] = identifier;
     }
@@ -995,14 +997,31 @@
       return;
     }
 
-    data.id = id();
-    db[listName].push(data);
+    const editId = form.dataset.editId;
 
-    if (saveDB()) {
-      render();
-      notice("তথ্য সফলভাবে সংরক্ষণ হয়েছে");
-    }
-  });
+if (editId) {
+  const existingRecord = db[listName].find(
+    item => item.id === editId
+  );
+
+  if (!existingRecord) {
+    notice("যে রেকর্ডটি পরিবর্তন করবেন, সেটি পাওয়া যায়নি");
+    return;
+  }
+
+  Object.assign(existingRecord, data);
+  delete form.dataset.editId;
+} else {
+  data.id = id();
+  db[listName].push(data);
+}
+
+if (saveDB()) {
+  render();
+  notice(editId
+    ? "তথ্য সফলভাবে আপডেট হয়েছে"
+    : "তথ্য সফলভাবে সংরক্ষণ হয়েছে");
+}
 
   document.addEventListener("input", event => {
     const search = event.target.closest("[data-search]");
