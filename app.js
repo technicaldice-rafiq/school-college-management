@@ -232,18 +232,25 @@
     </div>`;
   }
 
-  function row(cells, recordId = "", type = currentPage) {
-    const action = recordId
-      ? `<td><button type="button" class="scm-btn scm-danger"
-          data-delete="${esc(recordId)}" data-type="${esc(type)}">মুছুন</button></td>`
-      : "";
+  
+function row(cells, recordId = "", type = currentPage) {
+  const action = recordId
+    ? `<td>
+        <button type="button" class="scm-btn"
+          data-edit="${esc(recordId)}"
+          data-type="${esc(type)}">সম্পাদনা</button>
+        <button type="button" class="scm-btn scm-danger"
+          data-delete="${esc(recordId)}"
+          data-type="${esc(type)}">মুছুন</button>
+      </td>`
+    : "";
 
-    return `<tr>${cells.map(cell => `<td>${cell}</td>`).join("")}${action}</tr>`;
-  }
+  return `<tr>${cells.map(cell => `<td>${cell}</td>`).join("")}${action}</tr>`;
+}
 
-  function actionHeaders(headers) {
-    return [...headers, "কাজ"];
-  }
+function actionHeaders(headers) {
+  return [...headers, "কাজ"];
+}
 
   function pageTitle(title, description = "") {
     return `<div class="scm-heading">
