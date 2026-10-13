@@ -553,4 +553,42 @@ button:focus-visible,
     box-shadow: none;
     break-inside: avoid;
   }
+} 
+/* Mobile layout fix - October 2026 */
+@media (max-width: 800px) {
+.sidebar {
+display: flex !important;
+flex-direction: column !important;
+align-items: stretch !important;
+overflow-x: visible !important;
+overflow-y: visible !important;
+width: 100% !important;
+height: auto !important;
+gap: 5px !important;
+}
+
+.sidebar .nav {
+display: block;
+flex: 0 0 auto !important;
+width: 100% !important;
+min-height: 44px !important;
+text-align: left !important;
+white-space: normal !important;
+margin: 0 !important;
+}
+
+.layout {
+display: grid !important;
+grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#main {
+width: 100% !important;
+min-width: 0 !important;
+padding: 12px !important;
+}
+
+.topbar {
+width: 100%;
+}
 }
