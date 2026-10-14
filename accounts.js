@@ -299,7 +299,18 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
               <option>শিক্ষক</option><option>অন্যান্য কর্মচারী</option>
             </select>
           </label>
-          <label>কর্মীর নাম <input name="staffName" required></label>
+          
+<label>কর্মীর নাম
+  <select name="staffName" required>
+    <option value="">শিক্ষক নির্বাচন করুন</option>
+    ${db.teachers.map(t => `
+      <option value="${esc(t.name || "")}">
+        ${esc(t.name || "")}
+      </option>
+    `).join("")}
+  </select>
+</label>
+
           <label>বেতন মাস <input name="month" type="month" value="${month}" required></label>
           <label>পরিশোধের তারিখ <input name="date" type="date" value="${date}" required></label>
           <label>পরিশোধিত টাকা <input name="amount" type="number" min="1" step="0.01" required></label>
