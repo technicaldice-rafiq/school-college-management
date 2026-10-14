@@ -11,10 +11,14 @@
   }
 
   const arrayNames = [
-    "accountSalaries",
-    "accountStudentFees",
-    "accountExamFees",
-    "accountMonthlyRates"
+    
+"accountExamFees", "accountMonthlyRates",
+"admissionEnquiries", "feePlans", "feeAdjustments",
+"staffAttendance", "homework", "timetable", "lessonPlans",
+"leaveRequests", "gatepasses", "notices", "expenses",
+"otherIncome", "transportRoutes", "studentTransport",
+"calendarEvents", "parentLinks", "auditLog"
+
   ];
 
   function getDB() {
@@ -413,6 +417,25 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
       else db.accountMonthlyRates.push({
         id: makeId(), studentId: data.studentId, amount
       });
+      
+    admissionEnquiries: [],
+    feePlans: [],
+    feeAdjustments: [],
+    staffAttendance: [],
+    homework: [],
+    timetable: [],
+    lessonPlans: [],
+    leaveRequests: [],
+    gatepasses: [],
+    notices: [],
+    expenses: [],
+    otherIncome: [],
+    transportRoutes: [],
+    studentTransport: [],
+    calendarEvents: [],
+    parentLinks: [],
+    auditLog: []
+
       saveAndRender("মাসিক ফি নির্ধারণ সেভ হয়েছে।");
       return;
     }
