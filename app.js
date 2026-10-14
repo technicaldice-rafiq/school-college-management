@@ -392,7 +392,12 @@ function actionHeaders(headers) {
     input("শিক্ষক আইডি", "teacherId", "text", true) +
     input("বিষয়/পদবি", "subject", "text", true) +
     input("মোবাইল", "phone") +
-    input("বেতন", "salary", "number");
+    input("বেতন", "salary", "number") +
+`<label class="scm-field">
+  শিক্ষকের ছবি
+  <input type="file" name="photoFile"
+    accept="image/*" capture="user">
+</label>`;
 
   const rows = db.teachers.map(teacher => {
     const profileButton = `
