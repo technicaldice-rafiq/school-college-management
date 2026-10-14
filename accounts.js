@@ -417,12 +417,12 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
       return;
     }
 
-    if (!Number.isFinite(amount) || amount <= 0) {
-      alert("সঠিক টাকার পরিমাণ দিন।");
-      return;
-    }
-
     
+if (!Number.isFinite(amount) || amount <= 0) {
+  alert("সঠিক টাকার পরিমাণ দিন।");
+  return;
+}
+
 if (type === "salary") {
   const staffName = (
     data.staffType === "শিক্ষক"
@@ -441,46 +441,49 @@ if (type === "salary") {
     date: data.date,
     month: data.month,
     staffType: data.staffType,
-    staffName: staffName,
+    staffName,
     amount,
     note: data.note || ""
   });
 
   saveAndRender("বেতনের তথ্য সেভ হয়েছে।");
+} else if (type === "monthly" || type === "exam") {
+  const student = db.students.find(
+    s => String(s.studentId) === String(data.studentId)
+  );
+
+  if (!student) {
+    alert("আগে শিক্ষার্থী যোগ করুন এবং সঠিক শিক্ষার্থী নির্বাচন করুন।");
+    return;
+  }
+
+  if (type === "monthly") {
+    db.accountStudentFees.push({
+      id: makeId(),
+      receiptNo: "FEE-" + Date.now(),
+      date: data.date,
+      month: data.month,
+      studentId: data.studentId,
+      studentName: student.name,
+      amount
+    });
+
+    saveAndRender("মাসিক ফি সেভ হয়েছে।");
+  } else {
+    db.accountExamFees.push({
+      id: makeId(),
+      receiptNo: "EXAM-" + Date.now(),
+      date: data.date,
+      examName: data.examName.trim(),
+      studentId: data.studentId,
+      studentName: student.name,
+      amount
+    });
+
+    saveAndRender("পরীক্ষার ফি সেভ হয়েছে।");
+  }
 }
 
-      saveAndRender("বেতনের তথ্য সেভ হয়েছে।");
-    } else if (type === "monthly" || type === "exam") {
-      const student = db.students.find(s => String(s.studentId) === String(data.studentId));
-      if (!student) {
-        alert("আগে শিক্ষার্থী যোগ করুন এবং সঠিক শিক্ষার্থী নির্বাচন করুন।");
-        return;
-      }
-
-      if (type === "monthly") {
-        db.accountStudentFees.push({
-          id: makeId(),
-          receiptNo: "FEE-" + Date.now(),
-          date: data.date,
-          month: data.month,
-          studentId: data.studentId,
-          studentName: student.name,
-          amount
-        });
-        saveAndRender("মাসিক ফি সেভ হয়েছে। রসিদ তালিকা থেকে প্রিন্ট করুন।");
-      } else {
-        db.accountExamFees.push({
-          id: makeId(),
-          receiptNo: "EXAM-" + Date.now(),
-          date: data.date,
-          examName: data.examName.trim(),
-          studentId: data.studentId,
-          studentName: student.name,
-          amount
-        });
-        saveAndRender("পরীক্ষার ফি সেভ হয়েছে। রসিদ তালিকা থেকে প্রিন্ট করুন।");
-      }
-    }
   });
 
   document.addEventListener("click", event => {
