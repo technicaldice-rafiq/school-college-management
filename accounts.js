@@ -169,7 +169,32 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
     const salaryTotal = db.accountSalaries
       .filter(x => x.month === month)
       .reduce((n, x) => n + Number(x.amount || 0), 0);
+// শিক্ষকদের মাসিক বেতন ও বকেয়া হিসাব
+    const teacherSalaryRows = db.teachers.map(t => {
+      const expected = Math.max(0, Number(t.salary || 0));
 
+      const paid = db.accountSalaries
+        .filter(x =>
+          x.month === month &&
+          String(x.staffName || "").trim() ===
+          String(t.name || "").trim()
+        )
+        .reduce((n, x) => n + Number(x.amount || 0), 0);
+
+      return {
+        name: t.name || "",
+        teacherId: t.teacherId || "",
+        expected,
+        paid,
+        due: Math.max(0, expected - paid)
+      };
+    });
+
+    const expectedTeacherSalary = teacherSalaryRows
+      .reduce((n, t) => n + t.expected, 0);
+
+    const teacherSalaryDue = teacherSalaryRows
+      .reduce((n, t) => n + t.due, 0);
     const monthlyIncome = db.accountStudentFees
       .filter(x => x.month === month)
       .reduce((n, x) => n + Number(x.amount || 0), 0);
