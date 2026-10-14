@@ -872,6 +872,59 @@ if (editButton) {
   return;
 }
 
+const editButton = target.closest("[data-edit]");
+if (editButton) {
+  const type = editButton.dataset.type;
+  const recordId = editButton.dataset.edit;
+
+  if (!Array.isArray(db[type])) {
+    notice("তথ্য খুঁজে পাওয়া যায়নি");
+    return;
+  }
+
+  const record = db[type].find(
+    item => String(item.id) === String(recordId)
+  );
+
+  if (!record) {
+    notice("এই রেকর্ডটি পাওয়া যায়নি");
+    return;
+  }
+
+  const form = Array.from(
+    document.querySelectorAll("form[data-form]")
+  ).find(item => item.dataset.form === type);
+
+  if (!form) {
+    notice("সম্পাদনার ফর্ম পাওয়া যায়নি");
+    return;
+  }
+
+  for (const [key, value] of Object.entries(record)) {
+    const field = form.elements.namedItem(key);
+    if (field && "value" in field) {
+      field.value = value ?? "";
+    }
+  }
+
+  form.dataset.editId = String(record.id);
+
+  const submitButton = form.querySelector(
+    'button[type="submit"]'
+  );
+  if (submitButton) {
+    submitButton.textContent = "পরিবর্তন সংরক্ষণ";
+  }
+
+  form.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  notice("তথ্য পরিবর্তন করে সংরক্ষণ করুন");
+  return;
+}
+
     const deleteButton = target.closest("[data-delete]");
     if (deleteButton) {
       const type = deleteButton.dataset.type;
