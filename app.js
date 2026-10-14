@@ -385,7 +385,102 @@ function actionHeaders(headers) {
         ]), rows)}
       </section>`;
   }
+function teacherPhotoData(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) {
+      reject(new Error("সঠিক ছবি নির্বাচন করুন"));
+      return;
+    }
 
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(new Error("ছবি পড়া যায়নি"));
+
+    reader.onload = () => {
+      const img = new Image();
+
+      img.onerror = () => reject(new Error("ছবি খোলা যায়নি"));
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const scale = Math.min(
+          1,
+          700 / Math.max(img.width, img.height)
+        );
+
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("ছবি প্রস্তুত করা যায়নি"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
+      };
+
+      img.src = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+function openTeacherProfile(teacher, printAfter = false) {
+  const win = window.open("", "_blank");
+
+  if (!win) {
+    notice("প্রোফাইল খোলার জন্য ব্রাউজারে পপ-আপ অনুমতি দিন");
+    return;
+  }
+
+  if (printAfter) {
+    win.onload = () => {
+      win.focus();
+      win.print();
+    };
+  }
+
+  const photo = teacher.photo
+    ? `<img src="${esc(teacher.photo)}"
+         alt="শিক্ষকের ছবি"
+         style="width:130px;height:150px;object-fit:cover;
+         border-radius:10px;margin-bottom:15px">`
+    : `<p>শিক্ষকের ছবি যোগ করা হয়নি</p>`;
+
+  win.document.open();
+  win.document.write(`<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>শিক্ষক প্রোফাইল</title>
+<style>
+body{font-family:Arial,sans-serif;padding:24px;color:#172033}
+main{max-width:650px;margin:auto;border:1px solid #ddd;
+padding:24px;border-radius:12px}
+h2{margin-top:0}
+p{padding:8px 0;border-bottom:1px solid #eee}
+@media print{body{padding:0}main{border:0}}
+</style>
+</head>
+<body>
+<main>
+<h2>শিক্ষক প্রোফাইল</h2>
+${photo}
+<p><b>নাম:</b> ${esc(teacher.name)}</p>
+<p><b>শিক্ষক আইডি:</b> ${esc(teacher.teacherId)}</p>
+<p><b>বিষয়/পদবি:</b> ${esc(teacher.subject)}</p>
+<p><b>মোবাইল:</b> ${esc(teacher.phone || "—")}</p>
+<p><b>বেতন:</b> ${esc(money(teacher.salary))}</p>
+</main>
+</body>
+</html>`);
+  win.document.close();
+}
   function teachersPage() {
   const fields =
     input("শিক্ষকের নাম", "name", "text", true) +
@@ -852,7 +947,41 @@ function actionHeaders(headers) {
       return;
     }
 
+const teacherProfileButton =
+  target.closest("[data-teacher-profile]");
 
+if (teacherProfileButton) {
+  const teacher = db.teachers.find(
+    item => String(item.id) ===
+      teacherProfileButton.dataset.teacherProfile
+  );
+
+  if (!teacher) {
+    notice("শিক্ষকের তথ্য পাওয়া যায়নি");
+    return;
+  }
+
+  openTeacherProfile(teacher, false);
+  return;
+}
+
+const teacherPrintButton =
+  target.closest("[data-teacher-print]");
+
+if (teacherPrintButton) {
+  const teacher = db.teachers.find(
+    item => String(item.id) ===
+      teacherPrintButton.dataset.teacherPrint
+  );
+
+  if (!teacher) {
+    notice("শিক্ষকের তথ্য পাওয়া যায়নি");
+    return;
+  }
+
+  openTeacherProfile(teacher, true);
+  return;
+}
 const editButton = target.closest("[data-edit]");
 if (editButton) {
   const type = editButton.dataset.type;
@@ -1010,14 +1139,40 @@ if (editButton) {
     }
   });
 
-  document.addEventListener("submit", event => {
+  document.addEventListener("submit", async event => {
     const form = event.target.closest("form[data-form]");
     if (!form) return;
 
     event.preventDefault();
 
-    const data = Object.fromEntries(new FormData(form).entries());
-    const page = form.dataset.form;
+    const formData = new FormData(form);
+const photoFile = formData.get("photoFile");
+const data = Object.fromEntries(formData.entries());
+
+delete data.photoFile;
+
+const page = form.dataset.form;
+
+if (page === "teachers") {
+  const teacherEditId = form.dataset.editId || "";
+
+  if (photoFile instanceof File && photoFile.size > 0) {
+    try {
+      data.photo = await teacherPhotoData(photoFile);
+    } catch (error) {
+      notice(error.message || "ছবি সংরক্ষণ করা যায়নি");
+      return;
+    }
+  } else if (teacherEditId) {
+    const oldTeacher = db.teachers.find(
+      item => String(item.id) === teacherEditId
+    );
+
+    data.photo = oldTeacher?.photo || "";
+  } else {
+    data.photo = "";
+  }
+}
 
     const listMap = {
       students: "students",
