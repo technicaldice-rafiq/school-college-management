@@ -294,14 +294,17 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
         </div>
         <h3>১. কর্মচারী/শিক্ষকের বেতন</h3>
         <form data-account-form="salary" style="display:grid;gap:10px;max-width:650px">
-          <label>কর্মীর ধরন
-            <select name="staffType" required>
-              <option>শিক্ষক</option><option>অন্যান্য কর্মচারী</option>
-            </select>
-          </label>
           
-<label>কর্মীর নাম
-  <select name="staffName" required>
+          
+<label>কর্মীর ধরন
+  <select name="staffType" required>
+    <option value="শিক্ষক">শিক্ষক</option>
+    <option value="অন্যান্য কর্মচারী">অন্যান্য কর্মচারী</option>
+  </select>
+</label>
+
+<label>শিক্ষক নির্বাচন করুন
+  <select name="staffName">
     <option value="">শিক্ষক নির্বাচন করুন</option>
     ${db.teachers.map(t => `
       <option value="${esc(t.name || "")}">
@@ -310,6 +313,12 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
     `).join("")}
   </select>
 </label>
+
+<label>অন্যান্য কর্মচারীর নাম
+  <input name="staffNameOther"
+    placeholder="কর্মচারীর নাম লিখুন">
+</label>
+
 
           <label>বেতন মাস <input name="month" type="month" value="${month}" required></label>
           <label>পরিশোধের তারিখ <input name="date" type="date" value="${date}" required></label>
@@ -413,17 +422,33 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
       return;
     }
 
-    if (type === "salary") {
-      db.accountSalaries.push({
-        id: makeId(),
-        receiptNo: "PAY-" + Date.now(),
-        date: data.date,
-        month: data.month,
-        staffType: data.staffType,
-        staffName: data.staffName.trim(),
-        amount,
-        note: data.note || ""
-      });
+    
+if (type === "salary") {
+  const staffName = (
+    data.staffType === "শিক্ষক"
+      ? data.staffName
+      : data.staffNameOther
+  ).trim();
+
+  if (!staffName) {
+    alert("কর্মীর নাম নির্বাচন বা লিখুন।");
+    return;
+  }
+
+  db.accountSalaries.push({
+    id: makeId(),
+    receiptNo: "PAY-" + Date.now(),
+    date: data.date,
+    month: data.month,
+    staffType: data.staffType,
+    staffName: staffName,
+    amount,
+    note: data.note || ""
+  });
+
+  saveAndRender("বেতনের তথ্য সেভ হয়েছে।");
+}
+
       saveAndRender("বেতনের তথ্য সেভ হয়েছে।");
     } else if (type === "monthly" || type === "exam") {
       const student = db.students.find(s => String(s.studentId) === String(data.studentId));
