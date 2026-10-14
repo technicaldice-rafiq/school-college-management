@@ -387,31 +387,54 @@ function actionHeaders(headers) {
   }
 
   function teachersPage() {
-    const fields =
-      input("শিক্ষকের নাম", "name", "text", true) +
-      input("শিক্ষক আইডি", "teacherId", "text", true) +
-      input("বিষয়/পদবি", "subject", "text", true) +
-      input("মোবাইল", "phone") +
-      input("বেতন", "salary", "number");
+  const fields =
+    input("শিক্ষকের নাম", "name", "text", true) +
+    input("শিক্ষক আইডি", "teacherId", "text", true) +
+    input("বিষয়/পদবি", "subject", "text", true) +
+    input("মোবাইল", "phone") +
+    input("বেতন", "salary", "number");
 
-    const rows = db.teachers.map(teacher => row([
+  const rows = db.teachers.map(teacher => {
+    const profileButton = `
+      <button type="button" class="scm-btn"
+        data-teacher-profile="${esc(teacher.id)}">
+        প্রোফাইল দেখুন
+      </button>`;
+
+    const printButton = `
+      <button type="button" class="scm-btn"
+        data-teacher-print="${esc(teacher.id)}">
+        প্রিন্ট
+      </button>`;
+
+    const existingRow = row([
       esc(teacher.name),
       esc(teacher.teacherId),
       esc(teacher.subject),
       esc(teacher.phone || ""),
       money(teacher.salary)
-    ], teacher.id));
+    ], teacher.id, "teachers");
 
-    return pageTitle("শিক্ষক ব্যবস্থাপনা", "শিক্ষক নিবন্ধন ও তথ্য") +
-      formBox("নতুন শিক্ষক যোগ করুন", fields, "শিক্ষক সংরক্ষণ") +
-      `<section class="scm-card">
-        <h3>শিক্ষকের তালিকা (${db.teachers.length})</h3>
-        <input class="scm-search" data-search="teachers"
-          placeholder="শিক্ষক খুঁজুন">
-        ${table(actionHeaders(["নাম", "আইডি", "বিষয়/পদবি", "মোবাইল", "বেতন"]), rows)}
-      </section>`;
-  }
+    return existingRow.replace(
+      "</td></tr>",
+      `${profileButton}${printButton}</td></tr>`
+    );
+  });
 
+  return pageTitle(
+    "শিক্ষক ব্যবস্থাপনা",
+    "শিক্ষক নিবন্ধন, প্রোফাইল ও তথ্য"
+  ) +
+    formBox("নতুন শিক্ষক যোগ করুন", fields, "শিক্ষক সংরক্ষণ") +
+    `<section class="scm-card">
+      <h3>শিক্ষকের তালিকা (${db.teachers.length})</h3>
+      <input class="scm-search" data-search="teachers"
+        placeholder="শিক্ষক খুঁজুন">
+      ${table(actionHeaders([
+        "নাম", "আইডি", "বিষয়/পদবি", "মোবাইল", "বেতন"
+      ]), rows)}
+    </section>`;
+}
   function attendancePage() {
     const fields =
       input("তারিখ", "date", "date", true, today()) +
