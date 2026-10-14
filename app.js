@@ -393,37 +393,42 @@ function actionHeaders(headers) {
     input("বিষয়/পদবি", "subject", "text", true) +
     input("মোবাইল", "phone") +
     input("বেতন", "salary", "number") +
-`<label class="scm-field">
-  শিক্ষকের ছবি
-  <input type="file" name="photoFile"
-    accept="image/*" capture="user">
-</label>`;
+    `<label class="scm-field">
+      শিক্ষকের ছবি
+      <input type="file" name="photoFile"
+        accept="image/*" capture="user">
+    </label>`;
 
   const rows = db.teachers.map(teacher => {
-    const profileButton = `
-      <button type="button" class="scm-btn"
-        data-teacher-profile="${esc(teacher.id)}">
-        প্রোফাইল দেখুন
-      </button>`;
-
-    const printButton = `
-      <button type="button" class="scm-btn"
-        data-teacher-print="${esc(teacher.id)}">
-        প্রিন্ট
-      </button>`;
-
-    const existingRow = row([
+    const cells = [
       esc(teacher.name),
       esc(teacher.teacherId),
       esc(teacher.subject),
       esc(teacher.phone || ""),
       money(teacher.salary)
-    ], teacher.id, "teachers");
+    ].map(value => `<td>${value}</td>`).join("");
 
-    return existingRow.replace(
-      "</td></tr>",
-      `${profileButton}${printButton}</td></tr>`
-    );
+    return `<tr>
+      ${cells}
+      <td>
+        <button type="button" class="scm-btn"
+          data-teacher-profile="${esc(teacher.id)}">
+          প্রোফাইল দেখুন
+        </button>
+        <button type="button" class="scm-btn"
+          data-teacher-print="${esc(teacher.id)}">
+          প্রিন্ট
+        </button>
+        <button type="button" class="scm-btn"
+          data-edit="${esc(teacher.id)}" data-type="teachers">
+          সম্পাদনা
+        </button>
+        <button type="button" class="scm-btn scm-danger"
+          data-delete="${esc(teacher.id)}" data-type="teachers">
+          মুছুন
+        </button>
+      </td>
+    </tr>`;
   });
 
   return pageTitle(
