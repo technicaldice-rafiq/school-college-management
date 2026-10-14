@@ -195,6 +195,19 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
 
     const teacherSalaryDue = teacherSalaryRows
       .reduce((n, t) => n + t.due, 0);
+    const teacherSalaryPaid = teacherSalaryRows
+      .reduce((n, t) => n + Math.min(t.expected, t.paid), 0);
+
+    const teacherSalaryDueRows = teacherSalaryRows.map(t => `
+      <tr>
+        <td>${esc(t.name)}</td>
+        <td>${esc(t.teacherId || "-")}</td>
+        <td>৳ ${money(t.expected)}</td>
+        <td>৳ ${money(t.paid)}</td>
+        <td>৳ ${money(t.due)}</td>
+      </tr>
+    `).join("") ||
+      '<tr><td colspan="5">শিক্ষকের তথ্য নেই</td></tr>';
     const monthlyIncome = db.accountStudentFees
       .filter(x => x.month === month)
       .reduce((n, x) => n + Number(x.amount || 0), 0);
@@ -253,7 +266,32 @@ ${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}
           <div style="padding:14px;border:1px solid #ddd;border-radius:8px"><b>এই মাসের বেতন</b><h3>৳ ${money(salaryTotal)}</h3></div>
           <div style="padding:14px;border:1px solid #ddd;border-radius:8px"><b>মাসিক ফি বকেয়া</b><h3>৳ ${money(arrears)}</h3></div>
         </div>
+<h3>শিক্ষকদের মাসিক বেতন রিপোর্ট</h3>
+        <p>হিসাবের মাস: ${esc(month)}</p>
 
+        <div style="overflow-x:auto">
+          <table border="1" cellpadding="8"
+            style="border-collapse:collapse;width:100%">
+            <thead>
+              <tr>
+                <th>শিক্ষকের নাম</th>
+                <th>আইডি</th>
+                <th>নির্ধারিত বেতন</th>
+                <th>পরিশোধ</th>
+                <th>বাকি</th>
+              </tr>
+            </thead>
+            <tbody>${teacherSalaryDueRows}</tbody>
+            <tfoot>
+              <tr>
+                <th colspan="2">মোট</th>
+                <th>৳ ${money(expectedTeacherSalary)}</th>
+                <th>৳ ${money(teacherSalaryPaid)}</th>
+                <th>৳ ${money(teacherSalaryDue)}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
         <h3>১. কর্মচারী/শিক্ষকের বেতন</h3>
         <form data-account-form="salary" style="display:grid;gap:10px;max-width:650px">
           <label>কর্মীর ধরন
